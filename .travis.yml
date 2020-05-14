@@ -1,0 +1,48 @@
+language: go
+go:
+- 1.13
+- 1.14
+env:
+  global:
+  - TRAVIS_TAG=v1.0.1
+matrix:
+  fast_finish: true
+before_install:
+- go get github.com/mitchellh/gox
+- go get golang.org/x/tools/cmd/cover
+- go get github.com/mattn/goveralls
+install:
+- go get -d -v ./...
+script:
+- go vet -x ./...
+- go test -v ./...
+- go test -covermode=count -coverprofile=profile.cov ./...
+after_script:
+- "$HOME/gopath/bin/goveralls -coverprofile=profile.cov -service=travis-ci"
+before_deploy:
+- git config --local user.name "SlashGordon"
+- git config --local user.email "slash.gordon.dev@gmail.com"
+- git tag $TRAVIS_TAG || true
+#- gox -os="linux darwin windows" -arch="386 amd64" -output="buchhaltung-{{.OS}}-{{.Arch}}" ./cmd/buchhaltung.go
+#- env GOOS=darwin GOARCH=386 go build -o buchhaltung-osx-386 cmd/buchhaltung.go
+- env GOOS=darwin GOARCH=amd64 go build -o buchhaltung-osx-amd64 cmd/buchhaltung.go
+#- env GOOS=linux GOARCH=386 go build -o buchhaltung-linux-386 cmd/buchhaltung.go
+- env GOOS=linux GOARCH=amd64 go build -o buchhaltung-linux-amd64 cmd/buchhaltung.go
+#- env GOOS=windows GOARCH=386 go build -o buchhaltung-windows-386.exe cmd/buchhaltung.go
+- env GOOS=windows GOARCH=amd64 go build -o buchhaltung-windows-amd64.exe cmd/buchhaltung.go
+deploy:
+  provider: releases
+  file:
+  - buchhaltung-osx-386
+  - buchhaltung-osx-amd64
+  - buchhaltung-linux-386
+  - buchhaltung-linux-amd64
+  - buchhaltung-windows-386.exe
+  - buchhaltung-windows-amd64.exe
+  skip_cleanup: true
+  on:
+    branch: master
+    repo: SlashGordon/buchhaltung
+    tags: true
+  api_key:
+    secure: FAWDuLQCDkJmGTmCgJ3PbbXpBQeFCsu5st9Fh26nKnflZUX+znsLvYP2dcgFvkYdwCIHYz3Yx2ckHZZJwBDgRydM3M5VziayiU+iq16R5qNM5v/PwkNHZMUk90OSJHIkg7sSEWBTVv1NlAELNgGMp36eHk6+9WWw/xOr4+hbHcbvyB4bcmT6WpIVUUKNFFV8fB+IWpXooJuVkfF4sVVeXXM6xGU6eg94Uoz4l0gnVKsCKDQBXHKguFAXwDOU7lPZGZxIRvGJHeZeXi55do7HX2qd3hxSoxj+R4ivWT/vToOP0OgLBbazcaask10deML/1THKrtuc5nQUrkiY27G2fxaguvUVPctnDIDR0LY3u3hcBTr1R81qTIB3e3ccqwQT6+IcpQw/JbMpqa4vK8vm0+u8/7w/motI0cb32DlzbwIwN0+nsDS+NioPxqmScGj2eaH+5v0NGp4/Ks5wVcMVssF0sZDXI9/Fn/EklHONyYLVcpQwNDGZRzLUpyqSeVbVQlR4g/fkHcVlKGZc+z4q8WTuX06AxgeRHaLcNryZuN23zLo+jHLbBg3aItv5YiRmvxMi0jZFnAJXCnKzEZym+KD/afMKTyz2PvitcQ4PYQpcX2VPRlihMSNiMc44H1p8gi1aE46TIxsNXVo5qSMUhpGubrcnp4J2XxaHqpeYqZk=
