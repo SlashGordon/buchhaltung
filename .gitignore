@@ -16,3 +16,15 @@
 buchhaltung-osx-386
 profile.cov
 buchhaltung
+types/output.json
+pdf/339px-Opensource.svg.png
+.DS_Store
+pdf/Roboto/*
+pdf/Roboto.zip
+pdf/test.pdf
+pdf/testRead1.pdf
+r1.pdf
+pdfrename/Roboto.zip
+pdfrename/Roboto/*
+config_example.json
+.vscode/launch.json

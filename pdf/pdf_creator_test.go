@@ -6,13 +6,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetText(t *testing.T) {
+func TestPDFCreator(t *testing.T) {
 	InitLicense()
-	_, err := GetText("")
-	assert.Error(t, err)
 	invocie := Invoice{
-		OutputPath:  "testRead1.pdf",
-		LogoPath:    "",
+		OutputPath:  "test.pdf",
+		LogoPath:    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Opensource.svg/339px-Opensource.svg.png",
 		FontDir:     "https://fonts.google.com/download?family=Roboto",
 		FontPackage: "Roboto.zip",
 		FontBold:    "Roboto-Bold.ttf",
@@ -20,16 +18,19 @@ func TestGetText(t *testing.T) {
 		InvoiceName: "Test GmbH",
 		Paragraphs: Paragraphs{
 			Paragraph{
-				Text:     "This is a test",
+				Text:     "Test",
 				FontSize: 22,
 				Margins:  []float64{0, 0, 0, 0},
 				Color:    []byte{100, 100, 199},
 			},
+			Paragraph{
+				Text:     "Test2",
+				FontSize: 22,
+				Margins:  []float64{50, 50, 50, 50},
+				Color:    []byte{50, 20, 30},
+			},
 		},
 	}
-	errPdf := invocie.Start()
-	assert.NoError(t, errPdf)
-	text, err2 := GetText("testRead1.pdf")
-	assert.NoError(t, err2)
-	assert.Equal(t, "This is a test\nTest GmbH Page 1 of 1", text)
+	err := invocie.Start()
+	assert.NoError(t, err)
 }
