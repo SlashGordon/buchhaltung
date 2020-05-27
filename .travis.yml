@@ -23,13 +23,13 @@ before_deploy:
 - git config --local user.name "SlashGordon"
 - git config --local user.email "slash.gordon.dev@gmail.com"
 - git tag $TRAVIS_TAG || true
-#- gox -os="linux darwin windows" -arch="386 amd64" -output="buchhaltung-{{.OS}}-{{.Arch}}" ./cmd/buchhaltung.go
-#- env GOOS=darwin GOARCH=386 go build -o buchhaltung-osx-386 cmd/buchhaltung.go
-- env GOOS=darwin GOARCH=amd64 go build -o buchhaltung-osx-amd64 cmd/buchhaltung.go
-#- env GOOS=linux GOARCH=386 go build -o buchhaltung-linux-386 cmd/buchhaltung.go
-- env GOOS=linux GOARCH=amd64 go build -o buchhaltung-linux-amd64 cmd/buchhaltung.go
-#- env GOOS=windows GOARCH=386 go build -o buchhaltung-windows-386.exe cmd/buchhaltung.go
-- env GOOS=windows GOARCH=amd64 go build -o buchhaltung-windows-amd64.exe cmd/buchhaltung.go
+#- gox -os="linux darwin windows" -arch="386 amd64" -output="buchhaltung-{{.OS}}-{{.Arch}}" ./buchhaltung.go
+#- env GOOS=darwin GOARCH=386 go build -o buchhaltung-osx-386 buchhaltung.go
+- env GOOS=darwin GOARCH=amd64 go build -o buchhaltung-osx-amd64 buchhaltung.go
+#- env GOOS=linux GOARCH=386 go build -o buchhaltung-linux-386 buchhaltung.go
+- env GOOS=linux GOARCH=amd64 go build -o buchhaltung-linux-amd64 buchhaltung.go
+#- env GOOS=windows GOARCH=386 go build -o buchhaltung-windows-386.exe buchhaltung.go
+- env GOOS=windows GOARCH=amd64 go build -o buchhaltung-windows-amd64.exe buchhaltung.go
 deploy:
   provider: releases
   file:
