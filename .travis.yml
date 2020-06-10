@@ -4,7 +4,7 @@ go:
 - 1.14
 env:
   global:
-  - TRAVIS_TAG=v1.0.1
+  - TRAVIS_TAG=v1.0.2
 matrix:
   fast_finish: true
 before_install:
@@ -23,7 +23,7 @@ before_deploy:
 - git config --local user.name "SlashGordon"
 - git config --local user.email "slash.gordon.dev@gmail.com"
 - git tag $TRAVIS_TAG || true
-#- gox -os="linux darwin windows" -arch="386 amd64" -output="buchhaltung-{{.OS}}-{{.Arch}}" ./buchhaltung.go
+#- gox -os="linux darwin windows" -arch="386 amd64" -output="buchhaltung-{{.OS}}-{{.Arch}}" buchhaltung.go
 #- env GOOS=darwin GOARCH=386 go build -o buchhaltung-osx-386 buchhaltung.go
 - env GOOS=darwin GOARCH=amd64 go build -o buchhaltung-osx-amd64 buchhaltung.go
 #- env GOOS=linux GOARCH=386 go build -o buchhaltung-linux-386 buchhaltung.go
