@@ -4,7 +4,7 @@ go:
 - 1.14
 env:
   global:
-  - TRAVIS_TAG=v1.0.2
+  - TRAVIS_TAG=v1.0.3
 matrix:
   fast_finish: true
 before_install:
