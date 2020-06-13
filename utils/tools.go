@@ -163,12 +163,13 @@ func Cmd(name string, arg ...string) int {
 		Logger.Fatalf("cmd.Start: %v", err)
 	}
 
-	if err := cmd.Wait(); err != nil {
+	err := cmd.Wait()
+	if err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
 				return status.ExitStatus()
 			}
 		}
 	}
-	return 111
+	return 0
 }

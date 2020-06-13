@@ -1,18 +1,13 @@
 package pdfrename
 
 import (
-	"context"
 	"fmt"
-	"io"
 	"os"
 	"path"
+	"strings"
 
 	ty "github.com/SlashGordon/buchhaltung/types"
 	"github.com/SlashGordon/buchhaltung/utils"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/client"
 )
 
 // Start ...
@@ -25,69 +20,24 @@ func Start(conf ty.RenameConfig, inputPath string, outputPath string) error {
 		os.MkdirAll(ocrPath, os.ModePerm)
 	}
 	pdfFiles, err := utils.WalkMatch(inputPath, "*.pdf")
-	for _, pdfFile := range pdfFiles {
-		if runInDocker("jbarlow83/ocrmypdf:latest", inputPath, pdfFile, path.Join("ocr", pdfFile)) {
-			utils.Logger.Infof("OCR for file %v was successful.", pdfFile)
-		} else {
-			utils.Logger.Warnf("OCR for file %v was unsuccessful.", pdfFile)
+	if utils.Cmd("docker", "pull", "jbarlow83/ocrmypdf:latest") == 0 {
+		for _, pdfFile := range pdfFiles {
+			relPdfFile := strings.Replace(pdfFile, inputPath, "", 1)
+			if strings.HasPrefix(relPdfFile, "/") {
+				relPdfFile = strings.Replace(relPdfFile, "/", "", 1)
+			}
+			if utils.Cmd("docker", "run", "-v",
+				fmt.Sprintf("%v:/data", inputPath), "--workdir", "/data",
+				"--rm", "-i", "jbarlow83/ocrmypdf",
+				relPdfFile, path.Join("ocr", relPdfFile)) == 0 {
+				utils.Logger.Infof("OCR for file %v was successful.", pdfFile)
+			} else {
+				utils.Logger.Warnf("OCR for file %v was unsuccessful.", pdfFile)
+			}
 		}
+	} else {
+		utils.Logger.Warn("Couldn't start ocrmypdf because of missing docker dependencies.")
 	}
 	err = conf.Rename(inputPath, outputPath)
 	return err
-}
-
-func runInDocker(image string, vol string, input string, output string) bool {
-	ctx := context.Background()
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		utils.Logger.Warn("Couldn't start ocrmypdf because of missing docker dependencies.")
-		return false
-	}
-
-	reader, err := cli.ImagePull(
-		ctx,
-		fmt.Sprintf("docker.io/%v", image),
-		types.ImagePullOptions{})
-	if err != nil {
-		utils.Logger.Warn("Couldn't start ocrmypdf because of failed pull.")
-		utils.Logger.Error(err)
-		return false
-	}
-
-	io.Copy(os.Stdout, reader)
-
-	resp, err := cli.ContainerCreate(ctx,
-		&container.Config{
-			Image:      image,
-			WorkingDir: "/data",
-			Cmd:        []string{input, output},
-			Tty:        true,
-		},
-		&container.HostConfig{
-			Mounts: []mount.Mount{
-				{
-					Type:   mount.TypeBind,
-					Source: vol,
-					Target: "/data",
-				},
-			},
-		}, nil, "")
-
-	if err != nil {
-		utils.Logger.Warn("Couldn't create container.")
-		return false
-	}
-
-	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		utils.Logger.Warn("Couldn't start container.")
-		return false
-	}
-
-	status, _ := cli.ContainerWait(ctx, resp.ID)
-
-	if status != 0 {
-		utils.Logger.Warnf("OCR for file %v failed with status %i", input, status)
-		return false
-	}
-	return true
 }
