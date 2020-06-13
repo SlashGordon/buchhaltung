@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"syscall"
 )
 
 // IsValidURL ...
@@ -151,4 +153,22 @@ func WalkMatch(root, pattern string) ([]string, error) {
 		return nil, err
 	}
 	return matches, nil
+}
+
+// Cmd ...
+func Cmd(name string, arg ...string) int {
+	cmd := exec.Command(name, arg...)
+
+	if err := cmd.Start(); err != nil {
+		Logger.Fatalf("cmd.Start: %v", err)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				return status.ExitStatus()
+			}
+		}
+	}
+	return 111
 }

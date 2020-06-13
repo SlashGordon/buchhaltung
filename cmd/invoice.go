@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/SlashGordon/buchhaltung/pdf"
+	"github.com/SlashGordon/buchhaltung/pdfrename"
 	"github.com/SlashGordon/buchhaltung/types"
 	"github.com/SlashGordon/buchhaltung/utils"
 	"github.com/spf13/cobra"
@@ -26,7 +27,7 @@ func init() {
 			if err != nil {
 				utils.Logger.Error(err)
 			}
-			err = config.Rename(inputPath, outputPath)
+			err = pdfrename.Start(&config, inputPath, outputPath)
 			if err != nil {
 				utils.Logger.Error(err)
 			}
